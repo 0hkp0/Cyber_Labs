@@ -60,6 +60,7 @@ The target machine was first identified using ARP scanning.
 ```bash
 arp-scan --localnet
 ```
+![ARP Scan](images/01_arpscan.png)
 
 After identifying the target IP address, an Nmap scan was performed to identify open ports and running services.
 
