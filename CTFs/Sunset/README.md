@@ -67,6 +67,7 @@ After identifying the target IP address, an Nmap scan was performed to identify 
 ```bash
 nmap -APn -p- <TARGET-IP>
 ```
+![Nmap Scan](images/02_nmap.png)
 
 The scan revealed two services:
 
@@ -90,8 +91,11 @@ The file was downloaded and inspected locally.
 ```bash
 get backup
 ```
+![FTP](images/03_discoverbackup.png)
 
 The backup contained several usernames along with password hashes, making it a valuable source for credential discovery.
+
+![Credentials](images/04_credentials.png)
 
 ---
 
@@ -108,6 +112,7 @@ Since the hash had already been cracked previously, the stored credentials were 
 ```bash
 john --show decode.txt
 ```
+![Decode](images/05_Decode.png)
 
 The recovered credentials were then used for SSH authentication.
 
@@ -120,6 +125,7 @@ Using the recovered credentials, I successfully authenticated to the SSH service
 ```bash
 ssh sunset@<TARGET-IP>
 ```
+![SSH](images/06_sshlogin.png)
 
 The shell was obtained as a low-privileged user.
 
@@ -162,6 +168,7 @@ Output:
 ```text
 root
 ```
+![Root](images/07_rootandflag.png)
 
 ---
 
