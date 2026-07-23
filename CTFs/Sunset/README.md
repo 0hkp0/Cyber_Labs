@@ -91,7 +91,7 @@ The file was downloaded and inspected locally.
 ```bash
 get backup
 ```
-![FTP](images/03_discoverbackup.png)
+![](images/03_discoverbackup.png)
 
 The backup contained several usernames along with password hashes, making it a valuable source for credential discovery.
 
@@ -125,7 +125,7 @@ Using the recovered credentials, I successfully authenticated to the SSH service
 ```bash
 ssh sunset@<TARGET-IP>
 ```
-![SSH](images/06_sshlogin.png)
+![](images/06_sshlogin.png)
 
 The shell was obtained as a low-privileged user.
 
@@ -168,7 +168,7 @@ Output:
 ```text
 root
 ```
-![Root](images/07_rootandflag.png)
+![](images/07_rootandflag.png)
 
 ---
 
