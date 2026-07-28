@@ -104,7 +104,7 @@ dirb http://earth.local
 ```bash
 dirb https://terratest.earth.local
 ```
-![](Screenshots/04_terratestdirb.png)
+![](Screenshots/04_terratest_dirb.png)
 
 The enumeration revealed several interesting resources, including a `robots.txt` file on the HTTPS virtual host.
 
@@ -139,7 +139,7 @@ One of the decoded outputs produced readable plaintext resembling:
 ```text
 Earthclimatechangebad4humans
 ```
-![](Screenshots/08_XORdecrypt.png)
+![](Screenshots/08_XOR_decrypt.png)
 
 The repeated plaintext appeared to represent a potential password and was selected for authentication testing.
 
@@ -323,7 +323,7 @@ After obtaining root privileges, the root directory became accessible.
 cd /root
 cat flag.txt
 ```
-![](Screenshots/18_filesandflag.png)
+![](Screenshots/18_files_and_flag.png)
 
 Reading the root flag confirmed successful completion of the Earth machine and full system compromise.
 
